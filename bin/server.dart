@@ -1,7 +1,8 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:args/args.dart';
-import 'package:shelf/shelf.dart' as shelf;
+import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 
 // For Google Cloud Run, set _hostname to '0.0.0.0'.
@@ -22,13 +23,27 @@ void main(List<String> args) async {
     return;
   }
 
-  var handler = const shelf.Pipeline()
-      .addMiddleware(shelf.logRequests())
-      .addHandler(_echoRequest);
+  var handler =
+      const Pipeline().addMiddleware(logRequests()).addHandler(handleRequest);
+
+  await readQuestions();
 
   var server = await io.serve(handler, _hostname, port);
   print('Serving at http://${server.address.host}:${server.port}');
 }
 
-shelf.Response _echoRequest(shelf.Request request) =>
-    shelf.Response.ok('Request for "${request.url}"');
+List<String> questions;
+
+void readQuestions() async {
+  var file = File('data/questions');
+  questions = await file.readAsLines();
+  print('Read all questions!');
+}
+
+Response handleRequest(Request request) {
+  var path = request.url.path;
+  if (path == 'test') {
+    return Response.ok(questions[Random().nextInt(questions.length)]);
+  }
+  return Response.ok('Request for "${request.url}"');
+}
