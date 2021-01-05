@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:meta/meta.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../web/dart/actions.dart' as actions;
+import 'random_string.dart';
 
 final allGames = <Game>[];
 final allPlayers = <Player>[];
@@ -19,17 +19,16 @@ void readQuestions() async {
 
 class Game {
   final String code;
-  final Player host;
   final _questions = <String>[];
   final _players = <Player>[];
+  Player get host => _players.isEmpty ? null : _players.first;
 
-  Game({@required this.code, @required this.host}) {
+  Game({@required this.code, @required Player host}) {
     _questions.addAll(allQuestions);
+    addPlayer(host);
   }
 
-  static String _generateCode() {
-    return 'lmao';
-  }
+  static String _generateCode() => getRandomString(4);
 
   static Game create(Player host) {
     var code = _generateCode();
@@ -49,6 +48,8 @@ class Game {
   void removePlayer(Player p) {
     _players.remove(p);
   }
+
+  void log(Object msg) => print('Game $code: $msg');
 }
 
 class Player {
@@ -70,7 +71,6 @@ class Player {
 
         var id = json['id'];
         if (id != null) {
-          print('Processed a job called $id or summin idk');
           webSocket.sink.add(jsonEncode({'id': id, 'result': result}));
         }
       }
@@ -90,6 +90,7 @@ class Player {
   dynamic createGame() {
     var game = Game.create(this);
     allGames.add(game);
+    game.log('Created!');
     return {'code': game.code, 'questions': game._questions};
   }
 }
