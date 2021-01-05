@@ -254,7 +254,7 @@ packages:
     source: hosted
     version: "0.12.9"
   meta:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: meta
       url: "https://pub.dartlang.org"
@@ -352,7 +352,7 @@ packages:
     source: hosted
     version: "0.7.9"
   shelf_web_socket:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: shelf_web_socket
       url: "https://pub.dartlang.org"
@@ -429,7 +429,7 @@ packages:
     source: hosted
     version: "0.9.7+15"
   web_socket_channel:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: web_socket_channel
       url: "https://pub.dartlang.org"
