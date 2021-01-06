@@ -1,8 +1,23 @@
 class Player {
-  final String id;
-
   String _name;
   String get name => _name;
 
-  Player(this.id);
+  Player(Map<String, dynamic> json) {
+    onNameChange(json['name']);
+  }
+
+  void onNameChange(String name) {
+    print("$_name's name is now $name");
+    _name = name;
+  }
+
+  @override
+  String toString() => name;
+}
+
+class LocalPlayer extends Player {
+  LocalPlayer()
+      : super({
+          'name': 'Player One',
+        });
 }

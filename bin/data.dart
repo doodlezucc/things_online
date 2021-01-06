@@ -39,9 +39,19 @@ class Game {
   }
 
   void addPlayer(Player p) {
+    p.send(actions.EVENT_GAME_JOIN, {
+      'code': code,
+      'players': _players.map((all) => all.toJson()).toList(),
+      'questions': _questions
+    });
     _players.add(p);
+    sendAll(actions.EVENT_PLAYER_JOIN, params: p.toJson(), initiator: p);
+  }
+
+  void sendAll(dynamic action,
+      {Map<String, dynamic> params, Player initiator}) {
     for (var all in _players) {
-      all.send(actions.EVENT_PLAYER_JOIN);
+      if (all != initiator) all.send(action, params);
     }
   }
 
@@ -54,12 +64,7 @@ class Game {
 
 class Player {
   final WebSocketChannel webSocket;
-
-  void send(String action, [Map<String, dynamic> json]) {
-    webSocket.sink.add(jsonEncode({
-      'action': action,
-    }));
-  }
+  String name;
 
   Player(this.webSocket) {
     webSocket.stream.listen((data) async {
@@ -77,6 +82,13 @@ class Player {
     });
   }
 
+  void send(String action, [Map<String, dynamic> params]) {
+    webSocket.sink.add(jsonEncode({
+      'action': action,
+      if (params != null) 'params': params,
+    }));
+  }
+
   Future<dynamic> handleAction(
       String action, Map<String, dynamic> params) async {
     switch (action) {
@@ -87,10 +99,11 @@ class Player {
     return null;
   }
 
-  dynamic createGame() {
+  void createGame() {
     var game = Game.create(this);
     allGames.add(game);
     game.log('Created!');
-    return {'code': game.code, 'questions': game._questions};
   }
+
+  Map<String, dynamic> toJson() => {'name': name};
 }
