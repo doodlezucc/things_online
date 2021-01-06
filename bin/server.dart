@@ -39,9 +39,9 @@ void main(List<String> args) async {
 
 final FutureOr<Response> Function(Request) connectWebSocket =
     ws.webSocketHandler((WebSocketChannel webSocket) {
-  print('New connection!');
   allPlayers.add(Player(webSocket));
-});
+  print('New connection! Players online: ${allPlayers.length}');
+}, pingInterval: Duration(seconds: 10));
 
 Future<Response> handleRequest(Request request) async {
   var path = request.url.path;

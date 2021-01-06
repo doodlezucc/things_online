@@ -26,6 +26,7 @@ class Game {
   Game({@required this.code, @required Player host}) {
     _questions.addAll(allQuestions);
     addPlayer(host);
+    log('Created');
   }
 
   static String _generateCode() => getRandomString(4);
@@ -39,6 +40,7 @@ class Game {
   }
 
   void addPlayer(Player p) {
+    p.game = this;
     p.send(actions.EVENT_GAME_JOIN, {
       'code': code,
       'players': _players.map((all) => all.toJson()).toList(),
@@ -57,14 +59,28 @@ class Game {
 
   void removePlayer(Player p) {
     _players.remove(p);
+    if (_players.isNotEmpty) {
+      sendAll(actions.EVENT_PLAYER_LEAVE, params: {'id': p.name});
+    } else {
+      dispose();
+    }
   }
 
-  void log(Object msg) => print('Game $code: $msg');
+  void dispose() {
+    allGames.remove(this);
+    log('Disposed');
+  }
+
+  void log(Object msg) => print('$this: $msg');
+
+  @override
+  String toString() => 'Game $code';
 }
 
 class Player {
   final WebSocketChannel webSocket;
   String name;
+  Game game;
 
   Player(this.webSocket) {
     webSocket.stream.listen((data) async {
@@ -79,7 +95,17 @@ class Player {
           webSocket.sink.add(jsonEncode({'id': id, 'result': result}));
         }
       }
+    }, onDone: () {
+      onDisconnect();
     });
+  }
+
+  void onDisconnect() {
+    if (game != null) {
+      game.removePlayer(this);
+    }
+    allPlayers.remove(this);
+    print('$this disconnected (${webSocket.closeCode})');
   }
 
   void send(String action, [Map<String, dynamic> params]) {
@@ -102,8 +128,10 @@ class Player {
   void createGame() {
     var game = Game.create(this);
     allGames.add(game);
-    game.log('Created!');
   }
 
   Map<String, dynamic> toJson() => {'name': name};
+
+  @override
+  String toString() => 'Player "${(name ?? 'Unknown')}"';
 }
