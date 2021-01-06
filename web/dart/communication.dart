@@ -28,7 +28,7 @@ Future<void> wsConnect(
   return completer.future;
 }
 
-void performAction(dynamic action, [Map<String, String> params]) {
+void sendAction(dynamic action, [Map<String, dynamic> params]) {
   _webSocket.send(jsonEncode({
     'action': action,
     if (params != null) 'params': params,
@@ -37,7 +37,8 @@ void performAction(dynamic action, [Map<String, String> params]) {
 
 int _jobId = 0;
 
-Future<dynamic> request(dynamic action, [Map<String, String> params]) async {
+Future<dynamic> sendJobAction(dynamic action,
+    [Map<String, dynamic> params]) async {
   var myId = _jobId++;
   var json = jsonEncode({
     'id': myId,

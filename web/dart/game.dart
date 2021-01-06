@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'actions.dart';
 import 'communication.dart';
 import 'locals.dart';
@@ -6,27 +8,30 @@ import 'player.dart';
 class Game {
   final String code;
   List<String> _questions;
-  List<Player> _players;
+  final _players = <Player>[];
 
   Game(Map<String, dynamic> json) : code = json['code'] {
     _questions = List<String>.from(json['questions']);
-    _players = [player, ...json['players'].map((j) => Player(j))];
+    for (var pJson in json['players']) {
+      onPlayerJoin(Player(pJson));
+    }
+    onPlayerJoin(player);
     print(_questions);
-    print(_players);
+    querySelector('h1').text = 'Game code: $code';
   }
 
-  static void createGame() => performAction(GAME_CREATE);
+  static void createGame() => sendAction(GAME_CREATE, {'name': player.name});
 
   void onPlayerJoin(Player player) {
     _players.add(player);
-    print('Player $player joined the game');
+    print('$player joined the game');
   }
 
-  void onPlayerLeave(Player player) {
-    _players.remove(player);
-    print('Player $player left the game');
+  void onPlayerLeave(String playerName) {
+    _players.removeWhere((p) => p.name == playerName);
+    print('$playerName left the game');
   }
 
   Future<void> submitAnswer(String answer) =>
-      request(GAME_SUBMIT_ANSWER, {'answer': answer});
+      sendJobAction(GAME_SUBMIT_ANSWER, {'answer': answer});
 }

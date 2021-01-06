@@ -18,12 +18,22 @@ void main() async {
 
   answerField = querySelector('#answerField')
     ..onKeyDown.listen((e) {
+      // [Enter] key
       if (e.keyCode == 13) {
-        // [Enter] key
         e.preventDefault();
         submitAnswer();
       }
     });
+
+  querySelector('#joinCode').onKeyDown.listen((e) {
+    if (e.keyCode == 13) {
+      e.preventDefault();
+      sendAction(actions.GAME_JOIN, {
+        'code': (e.target as InputElement).value,
+        'name': player.name,
+      });
+    }
+  });
 }
 
 void submitAnswer() {
@@ -38,5 +48,8 @@ Null handleEvent(dynamic action, [Map<String, dynamic> json]) {
     case actions.EVENT_GAME_JOIN:
       game = Game(json);
       return print('Joined Game ${game.code}!');
+    case actions.EVENT_PLAYER_LEAVE:
+      return game.onPlayerLeave(json['id']);
   }
+  throw UnsupportedError('Event $action not implemented');
 }

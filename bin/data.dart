@@ -119,7 +119,14 @@ class Player {
       String action, Map<String, dynamic> params) async {
     switch (action) {
       case actions.GAME_CREATE:
+        name = params['name'];
         return createGame();
+      case actions.GAME_JOIN:
+        var code = params['code'];
+        name = params['name'];
+        return allGames
+            .singleWhere((g) => g.code == code, orElse: () => null)
+            ?.addPlayer(this);
     }
     stderr.addError(UnsupportedError('Action $action is not implemented.'));
     return null;

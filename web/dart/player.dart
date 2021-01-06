@@ -3,11 +3,12 @@ class Player {
   String get name => _name;
 
   Player(Map<String, dynamic> json) {
-    onNameChange(json['name']);
+    onNameChange(json['name'], tell: false);
   }
 
-  void onNameChange(String name) {
-    print("$_name's name is now $name");
+  void onNameChange(String name, {bool tell = true}) {
+    if (tell) print("$_name's name is now $name");
+
     _name = name;
   }
 

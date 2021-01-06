@@ -2,6 +2,8 @@
 
 const GAME_CREATE = 'createGame';
 const GAME_SUBMIT_ANSWER = 'submitAnswer';
+const GAME_JOIN = 'joinGame';
+const PLAYER_RENAME = 'playerRename';
 
 // Sent by server
 
